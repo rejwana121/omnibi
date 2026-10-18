@@ -132,6 +132,24 @@ class KPIEngine:
         """
         return self.db.query(sql)
 
+    def get_recent_orders(self, limit: int = 8) -> pd.DataFrame:
+        """Returns clean recent transaction records for display."""
+        sql = f"""
+        SELECT 
+            o.order_id,
+            c.customer_name,
+            c.region,
+            STRFTIME(o.order_timestamp, '%Y-%m-%d') as order_date,
+            o.channel,
+            ROUND(o.total_amount, 2) as amount,
+            o.order_status
+        FROM fact_orders o
+        JOIN dim_customers c ON o.customer_id = c.customer_id
+        ORDER BY o.order_timestamp DESC
+        LIMIT {limit};
+        """
+        return self.db.query(sql)
+
 
 if __name__ == "__main__":
     kpis = KPIEngine()
