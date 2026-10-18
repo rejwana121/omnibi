@@ -12,42 +12,78 @@ class KPIEngine:
     def __init__(self, db: DuckDBManager | None = None):
         self.db = db if db else DuckDBManager()
 
-    def get_executive_summary(self) -> dict:
-        """Computes top-level business health indicators."""
-        sql = """
+    def get_executive_summary(self, region: str = "All", segment: str = "All") -> dict:
+        """Computes top-level business health indicators with optional filters."""
+        where_clauses = ["o.order_status NOT IN ('Cancelled', 'Returned')"]
+        cust_where = []
+        
+        if region != "All":
+            where_clauses.append(f"c.region = '{region}'")
+            cust_where.append(f"region = '{region}'")
+        if segment != "All":
+            where_clauses.append(f"c.segment = '{segment}'")
+            cust_where.append(f"segment = '{segment}'")
+
+        order_where_str = " AND ".join(where_clauses)
+        cust_where_str = f"WHERE {' AND '.join(cust_where)}" if cust_where else ""
+
+        sql = f"""
         SELECT 
             COUNT(DISTINCT o.order_id) as total_orders,
-            ROUND(SUM(o.total_amount), 2) as total_revenue,
-            ROUND(AVG(o.total_amount), 2) as avg_order_value,
-            ROUND(SUM(i.line_profit), 2) as total_profit,
-            ROUND((SUM(i.line_profit) / NULLIF(SUM(i.line_total), 0)) * 100, 2) as gross_margin_pct
+            COALESCE(SUM(o.total_amount), 0) as total_revenue,
+            COALESCE(AVG(o.total_amount), 0) as avg_order_value,
+            COALESCE(SUM(i.line_profit), 0) as total_profit,
+            COALESCE((SUM(i.line_profit) / NULLIF(SUM(i.line_total), 0)) * 100, 0) as gross_margin_pct
         FROM fact_orders o
         JOIN fact_order_items i ON o.order_id = i.order_id
-        WHERE o.order_status NOT IN ('Cancelled', 'Returned');
+        JOIN dim_customers c ON o.customer_id = c.customer_id
+        WHERE {order_where_str};
         """
         df = self.db.query(sql)
         row = df.iloc[0].to_dict()
 
         # Customer & ticket metrics
-        cust_sql = """
+        cust_sql = f"""
         SELECT 
             COUNT(DISTINCT customer_id) as active_customers,
-            ROUND(AVG(churn_risk_score), 3) as avg_churn_risk
-        FROM dim_customers;
+            COALESCE(AVG(churn_risk_score), 0) as avg_churn_risk
+        FROM dim_customers {cust_where_str};
         """
         cust_row = self.db.query(cust_sql).iloc[0].to_dict()
         row.update(cust_row)
 
         ticket_sql = """
         SELECT 
-            ROUND(AVG(resolution_time_hrs), 1) as avg_resolution_hrs,
-            ROUND(AVG(satisfaction_score), 2) as avg_csat
+            COALESCE(AVG(resolution_time_hrs), 0) as avg_resolution_hrs,
+            COALESCE(AVG(satisfaction_score), 0) as avg_csat
         FROM fact_support_tickets;
         """
         ticket_row = self.db.query(ticket_sql).iloc[0].to_dict()
         row.update(ticket_row)
 
+        # Clean numerical types
+        row["total_orders"] = int(row.get("total_orders", 0))
+        row["active_customers"] = int(row.get("active_customers", 0))
         return row
+
+    def get_high_risk_customers(self, limit: int = 6) -> pd.DataFrame:
+        """Returns top customers at immediate risk of churning with commercial value."""
+        sql = f"""
+        SELECT 
+            c.customer_id,
+            c.customer_name,
+            c.segment,
+            c.region,
+            c.loyalty_tier,
+            ROUND(c.churn_risk_score * 100, 1) as risk_pct,
+            ROUND(COALESCE(SUM(o.total_amount), 0), 2) as total_spend
+        FROM dim_customers c
+        LEFT JOIN fact_orders o ON c.customer_id = o.customer_id
+        GROUP BY c.customer_id, c.customer_name, c.segment, c.region, c.loyalty_tier, c.churn_risk_score
+        ORDER BY c.churn_risk_score DESC, total_spend DESC
+        LIMIT {limit};
+        """
+        return self.db.query(sql)
 
     def get_monthly_revenue_trend(self) -> pd.DataFrame:
         """Returns monthly revenue and order volume for time-series charts."""
