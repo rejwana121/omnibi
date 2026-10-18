@@ -1,0 +1,39 @@
+name: OmniBI CI Pipeline
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  test-and-validate:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+
+    - name: Set up Python 3.11
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+        cache: 'pip'
+
+    - name: Install Dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install pytest
+
+    - name: Seed DuckDB Analytical Warehouse
+      run: |
+        python -m src.generator.enterprise_data_gen
+
+    - name: Run PyTest Quality Assurance Suite
+      run: |
+        python -m pytest tests/test_pipeline.py -v
+
+    - name: Dry-Run Validate Streamlit Dashboard
+      run: |
+        python -c "import app.dashboard; print('Streamlit app successfully validated!')"

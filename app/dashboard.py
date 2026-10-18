@@ -16,8 +16,10 @@ import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 
+from datetime import datetime
 from src.database.connection import DuckDBManager
 from src.analytics.kpi_engine import KPIEngine
+from src.analytics.report_generator import ExecutiveReportGenerator
 from src.agent.bi_agent import AutonomousBIAgent
 
 # Page Configuration
@@ -28,7 +30,7 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Custom High-Contrast SaaS Dark Theme Styling
+# Custom High-Contrast SaaS Dark Theme Styling with Rich Indigo-Obsidian Gradient
 st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap');
@@ -37,15 +39,15 @@ st.markdown("""
         font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
     }
 
-    /* Seamless Main Dark App Background */
+    /* Seamless Main Dark App with Rich Deep Indigo Gradient */
     .stApp {
-        background-color: #070a10 !important;
+        background: radial-gradient(circle at 15% 15%, #101726 0%, #0a0f1a 50%, #04060b 100%) !important;
         color: #f1f5f9 !important;
     }
 
-    /* Fix Seamless Dark Sidebar - No More Blinding White! */
+    /* Seamless Dark Sidebar with Subtle Navy Gradient */
     [data-testid="stSidebar"] {
-        background-color: #0b0f19 !important;
+        background: linear-gradient(180deg, #0e1626 0%, #090e1a 100%) !important;
         border-right: 1px solid rgba(255, 255, 255, 0.08) !important;
     }
     [data-testid="stSidebar"] * {
@@ -258,6 +260,7 @@ def format_currency(val: float) -> str:
 
 def main():
     db, kpis, agent = get_services()
+    report_gen = ExecutiveReportGenerator(kpis)
 
     # Top Brand Bar
     st.markdown("""
@@ -296,15 +299,36 @@ def main():
             ["All", "Enterprise", "Mid-Market", "SMB", "Consumer"]
         )
 
+        st.markdown("<hr style='border: 0; border-top: 1px solid #1e293b; margin: 18px 0;'>", unsafe_allow_html=True)
+        with st.expander("🔑 AI Agent Groq API (Optional)", expanded=False):
+            groq_key = st.text_input("Groq API Key", type="password", placeholder="gsk_...", help="Use a free Groq key from console.groq.com for dynamic queries")
+            if groq_key:
+                agent.set_api_key(groq_key)
+                st.success("Groq Llama-3 key active!")
+
     if app_mode == "📊 Executive Cockpit":
-        render_dashboard(kpis, region_filter, segment_filter)
+        render_dashboard(kpis, report_gen, region_filter, segment_filter)
     elif app_mode == "🤖 Autonomous AI Agent":
         render_agent_interface(agent)
     else:
         render_warehouse_explorer(db)
 
 
-def render_dashboard(kpis: KPIEngine, region: str, segment: str):
+def render_dashboard(kpis: KPIEngine, report_gen: ExecutiveReportGenerator, region: str, segment: str):
+    # Action Bar: Summary & Export
+    brief_col, download_col = st.columns([8, 3])
+    with brief_col:
+        st.markdown("<div style='font-size: 13px; color: #94a3b8; margin-bottom: 12px;'>Real-time metrics compiled directly from the in-process DuckDB columnar engine.</div>", unsafe_allow_html=True)
+    with download_col:
+        brief_md = report_gen.generate_markdown_brief()
+        st.download_button(
+            label="📥 Export Executive Briefing",
+            data=brief_md,
+            file_name=f"omnibi_executive_brief_{datetime.now().strftime('%Y%m%d')}.md",
+            mime="text/markdown",
+            use_container_width=True
+        )
+
     summary = kpis.get_executive_summary(region, segment)
 
     # 5-Column Responsive KPI Cards (Zero Text Truncation!)

@@ -1,7 +1,7 @@
 """
 Autonomous Business Intelligence Agent for OmniBI.
 Translates Natural Language executive questions into optimized DuckDB SQL,
-executes them securely, handles automatic self-correction upon errors,
+executes them securely, handles automatic self-correction (self-healing) upon errors,
 and generates human-readable business takeaways.
 """
 
@@ -23,6 +23,10 @@ class AutonomousBIAgent:
         self.db = db if db else DuckDBManager()
         self.api_key = api_key or os.getenv("GROQ_API_KEY") or os.getenv("OPENAI_API_KEY")
         self.schema_context = self.db.get_schema_summary()
+
+    def set_api_key(self, api_key: str) -> None:
+        """Dynamically updates the active LLM API key."""
+        self.api_key = api_key.strip() if api_key else None
 
     def _sanitize_sql(self, sql_str: str) -> str:
         """Strips markdown code fences and verifies read-only access."""
@@ -52,20 +56,42 @@ Generate an accurate, performant DuckDB SQL query to answer the user's business 
 1. Return ONLY the raw SQL query. Do not wrap in markdown quotes if possible, or use standard ```sql code block.
 2. Only write read-only SELECT queries.
 3. Use proper column aliases for clear business reporting.
-4. For date filtering or formatting, use DuckDB functions (e.g., STRFTIME(date, '%Y-%m'), DATE_TRUNC('month', date)).
+4. For date filtering or formatting, use DuckDB functions (e.g., STRFTIME(order_timestamp, '%Y-%m'), DATE_TRUNC('month', order_timestamp)).
 5. Join tables on standard foreign keys (e.g., fact_orders.customer_id = dim_customers.customer_id).
 
 User Question: {user_question}
 SQL Query:"""
+
+    def _heal_sql(self, user_question: str, broken_sql: str, error_msg: str) -> str:
+        """Agentic self-healing: sends execution traceback back to LLM for auto-correction."""
+        if not self.api_key:
+            return broken_sql
+        try:
+            from langchain_groq import ChatGroq
+            llm = ChatGroq(model_name="llama-3.3-70b-versatile", temperature=0.0, groq_api_key=self.api_key)
+            prompt = f"""You previously generated a DuckDB SQL query that failed with an execution error. Fix the query.
+
+### DATABASE SCHEMA:
+{self.schema_context}
+
+User Question: {user_question}
+Failed Query: {broken_sql}
+Error Message: {error_msg}
+
+Return ONLY the corrected raw SQL query:"""
+            res = llm.invoke(prompt)
+            return self._sanitize_sql(res.content)
+        except Exception as e:
+            print(f"[Agent Notice] Self-healing failed: {e}")
+            return broken_sql
 
     def generate_sql(self, user_question: str) -> str:
         """Generates SQL using an LLM if API key is configured, or intelligent heuristic matching."""
         # 1. If LLM is available (Groq / LangChain)
         if self.api_key:
             try:
-                # Attempt to use Groq if langchain_groq is installed
                 from langchain_groq import ChatGroq
-                llm = ChatGroq(model_name="llama-3.3-70b-versatile", temperature=0.0)
+                llm = ChatGroq(model_name="llama-3.3-70b-versatile", temperature=0.0, groq_api_key=self.api_key)
                 prompt = self._build_prompt(user_question)
                 response = llm.invoke(prompt)
                 return self._sanitize_sql(response.content)
@@ -123,7 +149,7 @@ SQL Query:"""
             GROUP BY issue_category, priority
             ORDER BY ticket_count DESC
             """
-        elif "top customer" in q or "vip" in q or "highest spend" in q:
+        elif "top customer" in q or "vip" in q or "highest spend" in q or "spenders" in q:
             return """
             SELECT 
                 c.customer_name,
@@ -151,29 +177,50 @@ SQL Query:"""
             """
 
     def ask(self, user_question: str) -> dict[str, Any]:
-        """Main conversational entrypoint. Generates SQL, executes query, and returns payload."""
+        """Main conversational entrypoint with automated self-healing retry logic."""
         sql = self.generate_sql(user_question)
         sql_clean = self._sanitize_sql(sql)
+        self_healed = False
 
         try:
             df = self.db.query(sql_clean)
-            return {
-                "success": True,
-                "question": user_question,
-                "sql": sql_clean,
-                "data": df,
-                "row_count": len(df),
-                "error": None
-            }
-        except Exception as e:
-            return {
-                "success": False,
-                "question": user_question,
-                "sql": sql_clean,
-                "data": pd.DataFrame(),
-                "row_count": 0,
-                "error": str(e)
-            }
+        except Exception as first_err:
+            # Attempt self-healing if LLM key is active
+            if self.api_key:
+                try:
+                    sql_clean = self._heal_sql(user_question, sql_clean, str(first_err))
+                    df = self.db.query(sql_clean)
+                    self_healed = True
+                except Exception as second_err:
+                    return {
+                        "success": False,
+                        "question": user_question,
+                        "sql": sql_clean,
+                        "data": pd.DataFrame(),
+                        "row_count": 0,
+                        "self_healed": False,
+                        "error": f"Initial Error: {first_err} | Correction Error: {second_err}"
+                    }
+            else:
+                return {
+                    "success": False,
+                    "question": user_question,
+                    "sql": sql_clean,
+                    "data": pd.DataFrame(),
+                    "row_count": 0,
+                    "self_healed": False,
+                    "error": str(first_err)
+                }
+
+        return {
+            "success": True,
+            "question": user_question,
+            "sql": sql_clean,
+            "data": df,
+            "row_count": len(df),
+            "self_healed": self_healed,
+            "error": None
+        }
 
 
 if __name__ == "__main__":
