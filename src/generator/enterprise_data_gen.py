@@ -186,7 +186,7 @@ def generate_support_tickets(customers_df: pd.DataFrame, n_tickets: int = 1200) 
 def seed_database():
     """Generates and writes all synthetic tables into DuckDB."""
     print("Connecting to DuckDB...")
-    db = DuckDBManager()
+    db = DuckDBManager(read_only=False)
     
     print("Generating Customers...")
     df_customers = generate_customers(500)

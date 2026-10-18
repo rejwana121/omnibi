@@ -194,7 +194,6 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 
-@st.cache_resource
 def get_services():
     db = DuckDBManager()
     kpis = KPIEngine(db)

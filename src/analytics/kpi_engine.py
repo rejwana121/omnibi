@@ -12,7 +12,7 @@ class KPIEngine:
     def __init__(self, db: DuckDBManager | None = None):
         self.db = db if db else DuckDBManager()
 
-    def get_executive_summary(self, region: str = "All", segment: str = "All") -> dict:
+    def get_executive_summary(self, region: str = "All", segment: str = "All", *args, **kwargs) -> dict:
         """Computes top-level business health indicators with optional filters."""
         where_clauses = ["o.order_status NOT IN ('Cancelled', 'Returned')"]
         cust_where = []

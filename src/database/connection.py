@@ -9,11 +9,14 @@ SCHEMA_SQL_PATH = Path(__file__).resolve().parent / "schema.sql"
 class DuckDBManager:
     """Manages the lifecycle and queries for the OmniBI DuckDB database."""
 
-    def __init__(self, db_path: str | Path | None = None):
+    def __init__(self, db_path: str | Path | None = None, read_only: bool = True):
         self.db_path = str(db_path) if db_path else str(DEFAULT_DB_PATH)
         os.makedirs(os.path.dirname(self.db_path), exist_ok=True)
-        self.conn = duckdb.connect(database=self.db_path, read_only=False)
-        self.init_schema()
+        if not os.path.exists(self.db_path):
+            self.conn = duckdb.connect(database=self.db_path, read_only=False)
+            self.init_schema()
+        else:
+            self.conn = duckdb.connect(database=self.db_path, read_only=read_only)
 
     def init_schema(self) -> None:
         """Executes the DDL schema if tables do not exist."""
