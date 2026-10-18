@@ -61,9 +61,11 @@ class KPIEngine:
         ticket_row = self.db.query(ticket_sql).iloc[0].to_dict()
         row.update(ticket_row)
 
-        # Clean numerical types
+        # Clean numerical types and round resolution hours
         row["total_orders"] = int(row.get("total_orders", 0))
         row["active_customers"] = int(row.get("active_customers", 0))
+        row["avg_resolution_hrs"] = round(float(row.get("avg_resolution_hrs", 0)), 1)
+        row["avg_csat"] = round(float(row.get("avg_csat", 0)), 2)
         return row
 
     def get_high_risk_customers(self, limit: int = 6) -> pd.DataFrame:

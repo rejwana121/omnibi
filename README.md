@@ -116,7 +116,7 @@ The warehouse is structured around an industry-standard star schema:
 
 ## 👤 Author & Academic Context
 
-* **Developer:** Rejwana Akter Shormi
+* **Developer:** Rejwana Akter
 * **Department:** Computing & Information Systems (CIS), Major in Business Intelligence
 * **Institution:** Daffodil International University (DIU)
-* **Target:** Advanced Research & Enterprise-grade Modern Data Engineering Portfolio for Master's/Ph.D. Scholarships.
+
