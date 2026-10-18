@@ -28,7 +28,7 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Custom High-End SaaS Dark Theme Styling
+# Custom High-Contrast SaaS Dark Theme Styling
 st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap');
@@ -37,10 +37,64 @@ st.markdown("""
         font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
     }
 
-    /* Background & Container */
+    /* Seamless Main Dark App Background */
     .stApp {
-        background: radial-gradient(circle at 10% 20%, #0d131f 0%, #070a10 90%);
-        color: #f1f5f9;
+        background-color: #070a10 !important;
+        color: #f1f5f9 !important;
+    }
+
+    /* Fix Seamless Dark Sidebar - No More Blinding White! */
+    [data-testid="stSidebar"] {
+        background-color: #0b0f19 !important;
+        border-right: 1px solid rgba(255, 255, 255, 0.08) !important;
+    }
+    [data-testid="stSidebar"] * {
+        color: #f1f5f9 !important;
+    }
+    [data-testid="stSidebar"] p, 
+    [data-testid="stSidebar"] span, 
+    [data-testid="stSidebar"] label {
+        color: #e2e8f0 !important;
+        font-weight: 500 !important;
+    }
+
+    /* Fix Unreadable White Buttons - High Contrast Dark Navy with Cyan Glow */
+    div.stButton > button, button[kind="secondary"] {
+        background-color: #151e2e !important;
+        color: #ffffff !important;
+        border: 1px solid #38bdf8 !important;
+        border-radius: 8px !important;
+        font-weight: 600 !important;
+        font-size: 13px !important;
+        padding: 8px 16px !important;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4) !important;
+        transition: all 0.2s ease !important;
+    }
+    div.stButton > button:hover, button[kind="secondary"]:hover {
+        background-color: #38bdf8 !important;
+        color: #070a10 !important;
+        border-color: #38bdf8 !important;
+        box-shadow: 0 0 16px rgba(56, 189, 248, 0.5) !important;
+        font-weight: 700 !important;
+    }
+    div.stButton > button p {
+        color: inherit !important;
+    }
+
+    /* Crisp High-Contrast Input Fields */
+    div.stTextInput > div > div > input {
+        background-color: #111827 !important;
+        color: #ffffff !important;
+        border: 1px solid #334155 !important;
+        border-radius: 8px !important;
+        font-size: 14px !important;
+    }
+    div.stTextInput > div > div > input:focus {
+        border-color: #38bdf8 !important;
+        box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.25) !important;
+    }
+    div.stTextInput > div > div > input::placeholder {
+        color: #64748b !important;
     }
 
     /* Top Brand Header */
@@ -48,12 +102,12 @@ st.markdown("""
         display: flex;
         align-items: center;
         justify-content: space-between;
-        padding: 12px 20px;
-        background: rgba(17, 24, 39, 0.7);
-        border: 1px solid rgba(255, 255, 255, 0.08);
+        padding: 14px 22px;
+        background: rgba(17, 24, 39, 0.85);
+        border: 1px solid rgba(56, 189, 248, 0.2);
         border-radius: 12px;
         backdrop-filter: blur(12px);
-        margin-bottom: 24px;
+        margin-bottom: 22px;
     }
 
     .brand-title {
@@ -70,11 +124,11 @@ st.markdown("""
     .status-pill {
         background: rgba(16, 185, 129, 0.15);
         color: #34d399;
-        border: 1px solid rgba(16, 185, 129, 0.3);
-        padding: 4px 12px;
+        border: 1px solid rgba(16, 185, 129, 0.35);
+        padding: 5px 14px;
         border-radius: 9999px;
         font-size: 12px;
-        font-weight: 600;
+        font-weight: 700;
         display: inline-flex;
         align-items: center;
         gap: 6px;
@@ -84,38 +138,29 @@ st.markdown("""
         height: 8px;
         background-color: #34d399;
         border-radius: 50%;
-        box-shadow: 0 0 8px #34d399;
+        box-shadow: 0 0 10px #34d399;
     }
 
     /* KPI Cards */
-    .kpi-grid {
-        display: grid;
-        grid-template-columns: repeat(5, 1fr);
-        gap: 16px;
-        margin-bottom: 24px;
-    }
-
     .kpi-card {
-        background: rgba(15, 23, 42, 0.75);
-        border: 1px solid rgba(255, 255, 255, 0.08);
-        border-radius: 14px;
+        background: rgba(17, 24, 39, 0.85);
+        border: 1px solid rgba(255, 255, 255, 0.09);
+        border-radius: 12px;
         padding: 18px 20px;
         backdrop-filter: blur(10px);
         transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
-        position: relative;
-        overflow: hidden;
     }
     .kpi-card:hover {
         transform: translateY(-2px);
-        border-color: rgba(56, 189, 248, 0.4);
-        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5), 0 0 15px rgba(56, 189, 248, 0.1);
+        border-color: rgba(56, 189, 248, 0.5);
+        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.6), 0 0 15px rgba(56, 189, 248, 0.15);
     }
 
     .kpi-top {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin-bottom: 10px;
+        margin-bottom: 8px;
     }
 
     .kpi-label {
@@ -130,16 +175,16 @@ st.markdown("""
         font-size: 11px;
         font-weight: 700;
         color: #34d399;
-        background: rgba(16, 185, 129, 0.12);
-        padding: 2px 8px;
+        background: rgba(16, 185, 129, 0.15);
+        padding: 3px 8px;
         border-radius: 6px;
     }
     .kpi-badge-blue {
         font-size: 11px;
         font-weight: 700;
         color: #38bdf8;
-        background: rgba(56, 189, 248, 0.12);
-        padding: 2px 8px;
+        background: rgba(56, 189, 248, 0.15);
+        padding: 3px 8px;
         border-radius: 6px;
     }
 
@@ -157,29 +202,30 @@ st.markdown("""
         color: #64748b;
     }
 
-    /* Section Panels */
-    .panel-card {
-        background: rgba(15, 23, 42, 0.75);
-        border: 1px solid rgba(255, 255, 255, 0.08);
+    /* What-If Simulation Box */
+    .sim-container {
+        background: linear-gradient(135deg, rgba(17, 24, 39, 0.9) 0%, rgba(15, 23, 42, 0.9) 100%);
+        border: 1px solid rgba(56, 189, 248, 0.3);
         border-radius: 14px;
-        padding: 20px;
-        backdrop-filter: blur(8px);
-        margin-bottom: 24px;
+        padding: 22px;
+        margin-top: 18px;
+        margin-bottom: 22px;
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4), inset 0 0 15px rgba(56, 189, 248, 0.05);
     }
 
     /* Custom Badges */
     .tag-critical {
         background: rgba(239, 68, 68, 0.2);
         color: #f87171;
-        border: 1px solid rgba(239, 68, 68, 0.3);
+        border: 1px solid rgba(239, 68, 68, 0.4);
         padding: 3px 8px;
         border-radius: 6px;
         font-weight: 700;
         font-size: 11px;
     }
     .tag-tier {
-        background: rgba(129, 140, 248, 0.15);
-        color: #818cf8;
+        background: rgba(129, 140, 248, 0.2);
+        color: #a5b4fc;
         padding: 3px 8px;
         border-radius: 6px;
         font-weight: 600;
@@ -218,28 +264,28 @@ def main():
     <div class="brand-container">
         <div class="brand-title">
             <span>⚡ OmniBI Enterprise</span>
-            <span style="font-size: 13px; font-weight: 500; color: #64748b; border-left: 1px solid #334155; padding-left: 10px;">
-                Modern OLAP Engine & Autonomous Decision Support
+            <span style="font-size: 13px; font-weight: 500; color: #94a3b8; border-left: 1px solid #334155; padding-left: 10px;">
+                Modern Columnar OLAP Engine & Autonomous Decision Support
             </span>
         </div>
         <div class="status-pill">
             <div class="status-dot"></div>
-            DuckDB In-Memory OLAP Cluster: ACTIVE
+            DuckDB Vectorized OLAP: ONLINE
         </div>
     </div>
     """, unsafe_allow_html=True)
 
-    # Sidebar Navigation
+    # Clean Sidebar Navigation (No clunky architecture boxes)
     with st.sidebar:
-        st.markdown("<h3 style='color: #f8fafc; font-weight: 800;'>Navigation</h3>", unsafe_allow_html=True)
+        st.markdown("<h3 style='color: #f8fafc; font-weight: 800; font-size: 18px;'>⚡ Operations</h3>", unsafe_allow_html=True)
         app_mode = st.radio(
             "Go to",
             ["📊 Executive Cockpit", "🤖 Autonomous AI Agent", "🗄️ OLAP Data Warehouse"],
             label_visibility="collapsed"
         )
 
-        st.markdown("---")
-        st.markdown("<h4 style='color: #94a3b8; font-size: 12px; text-transform: uppercase;'>Global Dimension Filters</h4>", unsafe_allow_html=True)
+        st.markdown("<hr style='border: 0; border-top: 1px solid #1e293b; margin: 18px 0;'>", unsafe_allow_html=True)
+        st.markdown("<h4 style='color: #38bdf8; font-size: 11px; text-transform: uppercase; font-weight: 800; letter-spacing: 0.5px;'>Filter Segment & Region</h4>", unsafe_allow_html=True)
         
         region_filter = st.selectbox(
             "Geographic Region",
@@ -249,20 +295,6 @@ def main():
             "Customer Segment",
             ["All", "Enterprise", "Mid-Market", "SMB", "Consumer"]
         )
-
-        st.markdown("---")
-        st.markdown("""
-        <div style="background: rgba(30, 41, 59, 0.5); border: 1px solid rgba(255,255,255,0.06); padding: 12px; border-radius: 8px;">
-            <div style="font-size: 11px; color: #38bdf8; font-weight: 700; text-transform: uppercase;">Architecture Stack</div>
-            <div style="font-size: 12px; color: #cbd5e1; margin-top: 4px;">• DuckDB Vectorized Execution</div>
-            <div style="font-size: 12px; color: #cbd5e1;">• PyArrow Columnar Transport</div>
-            <div style="font-size: 12px; color: #cbd5e1;">• LangChain Decision Agent</div>
-            <div style="font-size: 12px; color: #cbd5e1;">• Plotly Dark Glassmorphism</div>
-            <div style="margin-top: 8px; font-size: 11px; color: #64748b; border-top: 1px solid #334155; padding-top: 6px;">
-                Built by <b>Rejwana Akter Shormi</b><br>CIS / Business Intelligence
-            </div>
-        </div>
-        """, unsafe_allow_html=True)
 
     if app_mode == "📊 Executive Cockpit":
         render_dashboard(kpis, region_filter, segment_filter)
@@ -275,7 +307,7 @@ def main():
 def render_dashboard(kpis: KPIEngine, region: str, segment: str):
     summary = kpis.get_executive_summary(region, segment)
 
-    # 5-Column Responsive KPI Cards (No Text Truncation!)
+    # 5-Column Responsive KPI Cards (Zero Text Truncation!)
     col1, col2, col3, col4, col5 = st.columns(5)
 
     with col1:
@@ -286,7 +318,7 @@ def render_dashboard(kpis: KPIEngine, region: str, segment: str):
                 <span class="kpi-badge-green">+14.8%</span>
             </div>
             <div class="kpi-val">{format_currency(summary['total_revenue'])}</div>
-            <div class="kpi-sub">Net fulfilled sales</div>
+            <div class="kpi-sub">Net fulfilled volume</div>
         </div>
         """, unsafe_allow_html=True)
 
@@ -340,13 +372,52 @@ def render_dashboard(kpis: KPIEngine, region: str, segment: str):
         </div>
         """, unsafe_allow_html=True)
 
-    st.markdown("<div style='height: 18px;'></div>", unsafe_allow_html=True)
+    # ⚡ Interactive "What-If" Counterfactual Simulation Panel (Instant Attraction Feature)
+    st.markdown("""
+    <div class="sim-container">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+            <div style="font-size: 17px; font-weight: 800; color: #38bdf8; display: flex; align-items: center; gap: 8px;">
+                ⚡ Interactive What-If Counterfactual Simulator (Recourse Engine)
+            </div>
+            <span style="font-size: 11px; background: rgba(56, 189, 248, 0.2); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.4); padding: 3px 10px; border-radius: 6px; font-weight: 700;">
+                LIVE PREDICTIVE SIMULATION
+            </span>
+        </div>
+        <div style="font-size: 13px; color: #94a3b8; margin-bottom: 16px;">
+            Simulate retention economics before deploying capital. Adjust commercial discount caps and outreach coverage to view projected net financial ROI.
+        </div>
+    """, unsafe_allow_html=True)
+
+    sim_col1, sim_col2, sim_col3 = st.columns([4, 4, 4])
+    with sim_col1:
+        discount_rate = st.slider("Targeted Retention Discount Offer (%)", min_value=5, max_value=25, value=15, step=5)
+    with sim_col2:
+        coverage_pct = st.slider("Proactive Account Outreach Coverage (%)", min_value=20, max_value=100, value=75, step=5)
+
+    # Compute What-If Simulation Values dynamically
+    at_risk_spend = summary['total_revenue'] * 0.18  # ~18% baseline risk
+    retention_prob = 0.45 + (discount_rate * 0.015)
+    saved_revenue = at_risk_spend * (coverage_pct / 100.0) * retention_prob
+    campaign_cost = (saved_revenue * (discount_rate / 100.0)) + (summary['active_customers'] * (coverage_pct / 100.0) * 15.0)
+    net_savings = saved_revenue - campaign_cost
+    roi_pct = (net_savings / max(campaign_cost, 1.0)) * 100.0
+
+    with sim_col3:
+        st.markdown(f"""
+        <div style="background: rgba(11, 15, 25, 0.8); border: 1px solid #334155; border-radius: 10px; padding: 12px 16px; margin-top: 5px;">
+            <div style="font-size: 11px; font-weight: 700; color: #94a3b8; text-transform: uppercase;">Simulated Net Savings (ROI)</div>
+            <div style="font-size: 20px; font-weight: 800; color: #34d399; margin: 2px 0;">{format_currency(net_savings)} <span style="font-size: 14px; color: #38bdf8;">(+{roi_pct:.0f}% ROI)</span></div>
+            <div style="font-size: 11px; color: #64748b;">Preserved: {format_currency(saved_revenue)} | Spend: {format_currency(campaign_cost)}</div>
+        </div>
+        """, unsafe_allow_html=True)
+
+    st.markdown("</div>", unsafe_allow_html=True)
 
     # Main Visual Analytics Grid
     c1, c2 = st.columns([6, 4])
 
     with c1:
-        st.markdown("<div style='font-size: 16px; font-weight: 700; color: #f8fafc; margin-bottom: 8px;'>📈 Monthly Revenue Trajectory & Order Volume</div>", unsafe_allow_html=True)
+        st.markdown("<div style='font-size: 15px; font-weight: 700; color: #f8fafc; margin-bottom: 8px;'>📈 Monthly Revenue Trajectory & Sales Velocity</div>", unsafe_allow_html=True)
         df_monthly = kpis.get_monthly_revenue_trend()
         
         fig_rev = go.Figure()
@@ -361,10 +432,10 @@ def render_dashboard(kpis: KPIEngine, region: str, segment: str):
         ))
         fig_rev.update_layout(
             template="plotly_dark",
-            paper_bgcolor="rgba(15, 23, 42, 0.5)",
+            paper_bgcolor="rgba(17, 24, 39, 0.8)",
             plot_bgcolor="rgba(0, 0, 0, 0)",
-            margin=dict(l=10, r=10, t=25, b=25),
-            height=340,
+            margin=dict(l=10, r=10, t=20, b=20),
+            height=330,
             xaxis=dict(showgrid=True, gridcolor="rgba(255,255,255,0.06)", tickangle=-30),
             yaxis=dict(showgrid=True, gridcolor="rgba(255,255,255,0.06)", tickprefix="$"),
             legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1)
@@ -372,7 +443,7 @@ def render_dashboard(kpis: KPIEngine, region: str, segment: str):
         st.plotly_chart(fig_rev, use_container_width=True)
 
     with c2:
-        st.markdown("<div style='font-size: 16px; font-weight: 700; color: #f8fafc; margin-bottom: 8px;'>🏷️ Category Revenue vs. Profit Margin %</div>", unsafe_allow_html=True)
+        st.markdown("<div style='font-size: 15px; font-weight: 700; color: #f8fafc; margin-bottom: 8px;'>🏷️ Category Revenue vs. Profit Margin %</div>", unsafe_allow_html=True)
         df_cat = kpis.get_category_performance()
         
         fig_cat = px.bar(
@@ -385,23 +456,21 @@ def render_dashboard(kpis: KPIEngine, region: str, segment: str):
         )
         fig_cat.update_layout(
             template="plotly_dark",
-            paper_bgcolor="rgba(15, 23, 42, 0.5)",
+            paper_bgcolor="rgba(17, 24, 39, 0.8)",
             plot_bgcolor="rgba(0, 0, 0, 0)",
-            margin=dict(l=10, r=10, t=25, b=25),
-            height=340,
+            margin=dict(l=10, r=10, t=20, b=20),
+            height=330,
             xaxis=dict(showgrid=False),
             yaxis=dict(showgrid=True, gridcolor="rgba(255,255,255,0.06)", tickprefix="$"),
             coloraxis_colorbar=dict(title="Margin %", len=0.8)
         )
         st.plotly_chart(fig_cat, use_container_width=True)
 
-    st.markdown("<div style='height: 12px;'></div>", unsafe_allow_html=True)
-
     # Bottom Row: Customer Churn Matrix & Immediate High-Risk Action Table
     b1, b2 = st.columns([5, 5])
 
     with b1:
-        st.markdown("<div style='font-size: 16px; font-weight: 700; color: #f8fafc; margin-bottom: 8px;'>🎯 Customer Churn Exposure by Segment & Tier</div>", unsafe_allow_html=True)
+        st.markdown("<div style='font-size: 15px; font-weight: 700; color: #f8fafc; margin-bottom: 8px;'>🎯 Customer Churn Exposure by Segment & Tier</div>", unsafe_allow_html=True)
         df_churn = kpis.get_churn_risk_by_segment()
         fig_churn = px.sunburst(
             df_churn,
@@ -409,28 +478,28 @@ def render_dashboard(kpis: KPIEngine, region: str, segment: str):
             values="customer_count",
             color="avg_churn_risk",
             color_continuous_scale=[[0, "#10b981"], [0.5, "#f59e0b"], [1, "#ef4444"]],
-            labels={"avg_churn_risk": "Avg Risk Score"}
+            labels={"avg_churn_risk": "Avg Risk"}
         )
         fig_churn.update_layout(
             template="plotly_dark",
-            paper_bgcolor="rgba(15, 23, 42, 0.5)",
+            paper_bgcolor="rgba(17, 24, 39, 0.8)",
             margin=dict(l=5, r=5, t=10, b=10),
-            height=330
+            height=320
         )
         st.plotly_chart(fig_churn, use_container_width=True)
 
     with b2:
-        st.markdown("<div style='font-size: 16px; font-weight: 700; color: #f8fafc; margin-bottom: 8px;'>🚨 High-Risk Enterprise Accounts (Actionable Recourse)</div>", unsafe_allow_html=True)
+        st.markdown("<div style='font-size: 15px; font-weight: 700; color: #f8fafc; margin-bottom: 8px;'>🚨 High-Risk Enterprise Accounts (Actionable Recourse)</div>", unsafe_allow_html=True)
         high_risk_df = kpis.get_high_risk_customers(limit=5)
 
         for _, row in high_risk_df.iterrows():
             st.markdown(f"""
-            <div style="background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255,255,255,0.06); padding: 12px 16px; border-radius: 10px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center;">
+            <div style="background: rgba(17, 24, 39, 0.85); border: 1px solid rgba(255,255,255,0.07); padding: 12px 16px; border-radius: 10px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center;">
                 <div>
-                    <div style="font-weight: 700; color: #f1f5f9; font-size: 14px;">{row['customer_name']}</div>
-                    <div style="font-size: 12px; color: #64748b;">
-                        ID: <span style="color: #94a3b8;">{row['customer_id']}</span> | 
-                        Region: <span style="color: #94a3b8;">{row['region']}</span> | 
+                    <div style="font-weight: 700; color: #ffffff; font-size: 14px;">{row['customer_name']}</div>
+                    <div style="font-size: 12px; color: #64748b; margin-top: 2px;">
+                        ID: <span style="color: #cbd5e1;">{row['customer_id']}</span> | 
+                        Region: <span style="color: #cbd5e1;">{row['region']}</span> | 
                         Spend: <span style="color: #38bdf8; font-weight: 600;">${row['total_spend']:,.2f}</span>
                     </div>
                 </div>
@@ -444,8 +513,8 @@ def render_dashboard(kpis: KPIEngine, region: str, segment: str):
 
 def render_agent_interface(agent: AutonomousBIAgent):
     st.markdown("""
-    <div style="margin-bottom: 20px;">
-        <h2 style="color: #f8fafc; font-weight: 800; margin-bottom: 4px;">🤖 Autonomous BI Decision Agent</h2>
+    <div style="margin-bottom: 22px;">
+        <h2 style="color: #f8fafc; font-weight: 800; margin-bottom: 4px; font-size: 24px;">🤖 Autonomous BI Decision Agent</h2>
         <div style="color: #94a3b8; font-size: 14px;">
             Ask questions in plain English. The agent references schema metadata, generates validated DuckDB SQL, and displays interactive results with zero latency.
         </div>
@@ -453,7 +522,7 @@ def render_agent_interface(agent: AutonomousBIAgent):
     """, unsafe_allow_html=True)
 
     # Prompt Suggestions in Styled Cards
-    st.markdown("<div style='font-size: 13px; font-weight: 700; color: #64748b; margin-bottom: 8px; text-transform: uppercase;'>Suggested Analytical Inquiries</div>", unsafe_allow_html=True)
+    st.markdown("<div style='font-size: 12px; font-weight: 800; color: #38bdf8; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.5px;'>⚡ Quick Inquiries</div>", unsafe_allow_html=True)
     q1, q2, q3, q4 = st.columns(4)
     
     preset_query = None
@@ -461,9 +530,9 @@ def render_agent_interface(agent: AutonomousBIAgent):
         preset_query = "Show revenue and margin breakdown by product category"
     if q2.button("⚠️ Churn Vulnerability", use_container_width=True):
         preset_query = "Which customer segment is most prone to churn risk?"
-    if q3.button("👑 Top 10 Enterprise Spenders", use_container_width=True):
+    if q3.button("👑 Top 10 Spenders", use_container_width=True):
         preset_query = "Show top 10 highest spend customers"
-    if q4.button("🎧 Support CSAT & Delays", use_container_width=True):
+    if q4.button("🎧 Support CSAT", use_container_width=True):
         preset_query = "Customer support satisfaction and ticket resolution times"
 
     user_query = st.text_input(
@@ -481,7 +550,6 @@ def render_agent_interface(agent: AutonomousBIAgent):
             st.error(f"Execution Error: {result['error']}")
             st.code(result["sql"], language="sql")
         else:
-            # Query Details
             with st.expander("⚡ Compiled DuckDB SQL Query", expanded=True):
                 st.code(result["sql"], language="sql")
 
@@ -508,7 +576,7 @@ def render_agent_interface(agent: AutonomousBIAgent):
                         color_discrete_sequence=["#38bdf8"]
                     )
                     fig.update_layout(
-                        paper_bgcolor="rgba(15, 23, 42, 0.5)",
+                        paper_bgcolor="rgba(17, 24, 39, 0.8)",
                         plot_bgcolor="rgba(0,0,0,0)",
                         margin=dict(l=10, r=10, t=10, b=10),
                         height=280,
@@ -520,8 +588,8 @@ def render_agent_interface(agent: AutonomousBIAgent):
 
 def render_warehouse_explorer(db: DuckDBManager):
     st.markdown("""
-    <div style="margin-bottom: 20px;">
-        <h2 style="color: #f8fafc; font-weight: 800; margin-bottom: 4px;">🗄️ OLAP Data Warehouse Explorer</h2>
+    <div style="margin-bottom: 22px;">
+        <h2 style="color: #f8fafc; font-weight: 800; margin-bottom: 4px; font-size: 24px;">🗄️ OLAP Data Warehouse Explorer</h2>
         <div style="color: #94a3b8; font-size: 14px;">
             Examine in-process columnar tables, metadata definitions, and indexing directly from the underlying DuckDB engine.
         </div>
