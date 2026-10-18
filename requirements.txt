@@ -1,0 +1,22 @@
+# Core Analytics & Modern OLAP Database
+duckdb>=0.10.0
+pandas>=2.0.0
+numpy>=1.24.0
+pyarrow>=14.0.0
+
+# Synthetic Data Generation
+faker>=24.0.0
+
+# Interactive Visualization & Dashboard UI
+streamlit>=1.32.0
+plotly>=5.18.0
+
+# AI / Autonomous Agent & Querying
+langchain>=0.2.0
+langchain-community>=0.2.0
+langchain-core>=0.2.0
+pydantic>=2.0.0
+
+# Utilities
+python-dotenv>=1.0.0
+rich>=13.0.0
