@@ -8,35 +8,47 @@
 
 An end-to-end, high-performance Business Intelligence & Analytics platform built on the **Modern Data Stack (MDS)**. OmniBI bridges the gap between massive analytical data warehouses and non-technical executive decision-makers by combining **sub-second in-process OLAP (DuckDB)** with an **Autonomous Natural Language-to-SQL AI Agent**.
 
+<div align="center">
+  <img src="assets/omnibi_showcase_poster.png" alt="OmniBI Platform Showcase" width="100%"/>
+</div>
+
 ---
 
 ## 🏛️ System Architecture
 
+<div align="center">
+  <img src="assets/architecture.svg" alt="OmniBI System Architecture" width="100%"/>
+</div>
+
+<details>
+<summary><b>🔍 View Mermaid Specification</b></summary>
+
 ```mermaid
 flowchart TD
-    subgraph Data_Layer ["1. Data Generation & Ingestion Layer"]
+    subgraph Data_Layer["1. Data Generation & Ingestion Layer"]
         A["Enterprise Transaction Generator<br/>(Synthetic Multi-Region Event Stream)"] --> B["Relational Star Schema<br/>(Customers, Products, Orders, Items, Tickets)"]
     end
 
-    subgraph OLAP_Core ["2. High-Speed OLAP Core"]
+    subgraph OLAP_Core["2. High-Speed OLAP Core"]
         B --> C[("DuckDB In-Process Engine<br/>Columnar Storage & Vectorized Execution")]
         C --> D["KPI Engine<br/>(Pre-aggregated Revenue, Churn & Margin Metrics)"]
     end
 
-    subgraph Intelligence_Layer ["3. Autonomous Decision Agent"]
+    subgraph Intelligence_Layer["3. Autonomous Decision Agent"]
         E["Executive Natural Language Question"] --> F["Schema Awareness & Prompt Synthesizer"]
         F --> G["Text-to-SQL Compiler<br/>(LLM / Heuristic Engine)"]
         G --> H{"Security Guardrail Check"}
-        H -- "Violation Detected" --> I["Rejection / Safe Fallback"]
-        H -- "Sanitized Read-Only SQL" --> C
+        H -->|Violation Detected| I["Rejection / Safe Fallback"]
+        H -->|Sanitized Read-Only SQL| C
     end
 
-    subgraph Presentation_Layer ["4. Interactive Presentation"]
+    subgraph Presentation_Layer["4. Interactive Presentation"]
         D --> J["Executive Health Cockpit<br/>(Streamlit + Dynamic Plotly)"]
         C --> J
         J --> K["Live Insights & Actionable Recourse"]
     end
 ```
+</details>
 
 ---
 
