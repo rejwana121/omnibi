@@ -87,33 +87,43 @@ class KPIEngine:
         """
         return self.db.query(sql)
 
-    def get_monthly_revenue_trend(self) -> pd.DataFrame:
+    def get_monthly_revenue_trend(self, region: str = "All", *args, **kwargs) -> pd.DataFrame:
         """Returns monthly revenue and order volume for time-series charts."""
-        sql = """
+        where_clause = "WHERE o.order_status != 'Cancelled'"
+        if region != "All":
+            where_clause += f" AND c.region = '{region}'"
+
+        sql = f"""
         SELECT 
-            STRFTIME(order_timestamp, '%Y-%m') as year_month,
-            ROUND(SUM(total_amount), 2) as monthly_revenue,
-            COUNT(order_id) as order_count
-        FROM fact_orders
-        WHERE order_status != 'Cancelled'
+            STRFTIME(o.order_timestamp, '%Y-%m') as year_month,
+            ROUND(SUM(o.total_amount), 2) as monthly_revenue,
+            COUNT(o.order_id) as order_count
+        FROM fact_orders o
+        JOIN dim_customers c ON o.customer_id = c.customer_id
+        {where_clause}
         GROUP BY 1
         ORDER BY 1 ASC;
         """
         return self.db.query(sql)
 
-    def get_category_performance(self) -> pd.DataFrame:
+    def get_category_performance(self, region: str = "All", *args, **kwargs) -> pd.DataFrame:
         """Returns breakdown of sales, profit, and margins across product categories."""
-        sql = """
+        where_clause = "WHERE o.order_status != 'Cancelled'"
+        if region != "All":
+            where_clause += f" AND c.region = '{region}'"
+
+        sql = f"""
         SELECT 
             p.category,
             ROUND(SUM(i.line_total), 2) as category_revenue,
             ROUND(SUM(i.line_profit), 2) as category_profit,
-            ROUND((SUM(i.line_profit) / SUM(i.line_total)) * 100, 1) as profit_margin_pct,
+            ROUND((SUM(i.line_profit) / NULLIF(SUM(i.line_total), 0)) * 100, 1) as profit_margin_pct,
             SUM(i.quantity) as units_sold
         FROM fact_order_items i
         JOIN dim_products p ON i.product_id = p.product_id
         JOIN fact_orders o ON i.order_id = o.order_id
-        WHERE o.order_status != 'Cancelled'
+        JOIN dim_customers c ON o.customer_id = c.customer_id
+        {where_clause}
         GROUP BY p.category
         ORDER BY category_revenue DESC;
         """
@@ -134,19 +144,21 @@ class KPIEngine:
         """
         return self.db.query(sql)
 
-    def get_recent_orders(self, limit: int = 8) -> pd.DataFrame:
+    def get_recent_orders(self, region: str = "All", limit: int = 8, *args, **kwargs) -> pd.DataFrame:
         """Returns clean recent transaction records for display."""
+        where_clause = f"WHERE c.region = '{region}'" if region != "All" else ""
         sql = f"""
         SELECT 
-            o.order_id,
-            c.customer_name,
-            c.region,
-            STRFTIME(o.order_timestamp, '%Y-%m-%d') as order_date,
-            o.channel,
-            ROUND(o.total_amount, 2) as amount,
-            o.order_status
+            o.order_id as "Order ID",
+            c.customer_name as "Customer",
+            c.region as "Region",
+            STRFTIME(o.order_timestamp, '%Y-%m-%d') as "Date",
+            o.channel as "Channel",
+            ROUND(o.total_amount, 2) as "Amount ($)",
+            o.order_status as "Status"
         FROM fact_orders o
         JOIN dim_customers c ON o.customer_id = c.customer_id
+        {where_clause}
         ORDER BY o.order_timestamp DESC
         LIMIT {limit};
         """
